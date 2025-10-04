@@ -69,7 +69,20 @@ export default function RightSidebar() {
     }).format(value);
   };
 
-  const totalPortfolioValue = topHoldings.reduce((sum, h) => sum + h.usdValue, 0);
+  // Create holdings array that includes BNB from connected wallet
+  const allHoldings = [
+    // Add BNB holding if wallet is connected and has balance
+    ...(connected && bnb > 0 ? [{
+      mint: 'BNB',
+      symbol: 'BNB',
+      balance: bnb,
+      usdValue: usd,
+    }] : []),
+    // Add other holdings from portfolio analyzer
+    ...topHoldings,
+  ];
+  
+  const totalPortfolioValue = allHoldings.reduce((sum, h) => sum + h.usdValue, 0);
   
   // Calculate P&L for wallet balance using BNB price change
   const walletPnlPercentage = priceData?.price_change_percentage_24h || 0;
@@ -180,18 +193,18 @@ export default function RightSidebar() {
       {connected && (
         <Card className="p-4 cyber-border">
           <h2 className="text-lg font-cyber cyber-glow mb-4">TOP HOLDINGS</h2>
-          {portfolioLoading ? (
+          {portfolioLoading || balanceLoading ? (
             <div className="text-center py-8">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
             </div>
-          ) : topHoldings.length === 0 ? (
+          ) : allHoldings.length === 0 ? (
             <div className="text-center py-8 text-sm font-mono text-muted-foreground">
               No holdings found
             </div>
           ) : (
             <>
               <div className="space-y-3">
-                {topHoldings.map((holding, index) => {
+                {allHoldings.map((holding, index) => {
                   const percentage = totalPortfolioValue > 0 
                     ? (holding.usdValue / totalPortfolioValue) * 100 
                     : 0;
