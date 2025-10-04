@@ -117,7 +117,7 @@ export function useWalletBalance(walletAddress: string | null): WalletBalanceDat
 
     fetchBalance();
 
-    const intervalId = window.setInterval(fetchBalance, 30000);
+    const intervalId = window.setInterval(fetchBalance, 60000); // Reduced from 30s to 60s
 
     return () => {
       isMounted = false;

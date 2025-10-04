@@ -73,7 +73,27 @@ export async function getRealTimePrice(symbol: string = 'BNB/USD'): Promise<Cryp
     };
   }
   
-  // For other tokens, use CoinGecko directly
+  // Check cache first to reduce API calls
+  const cacheKey = `crypto_price_${symbol}`;
+  const cached = localStorage.getItem(cacheKey);
+  const now = Date.now();
+  
+  if (cached) {
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      const cacheAge = now - timestamp;
+      const maxCacheAge = 60000; // 1 minute cache
+      
+      if (cacheAge < maxCacheAge) {
+        console.log(`[DIRECT API] Using cached data for ${symbol}: $${data.current_price}`);
+        return data;
+      }
+    } catch (e) {
+      // Invalid cache, continue to API
+    }
+  }
+  
+  // For other tokens, use CoinGecko directly (with reduced frequency)
   const coinGeckoId = symbol === 'BTC/USD' ? 'bitcoin' : 
                      symbol === 'ETH/USD' ? 'ethereum' : 
                      symbol === 'BNB/USD' ? 'binancecoin' : 'bitcoin';
@@ -92,18 +112,37 @@ export async function getRealTimePrice(symbol: string = 'BNB/USD'): Promise<Cryp
       const coinData = data[coinGeckoId];
       
       if (coinData) {
-        console.log(`[DIRECT API] ${symbol} success: $${coinData.usd} (${coinData.usd_24h_change}%)`);
-        return {
+        const result = {
           current_price: coinData.usd,
           price_change_24h: coinData.usd_24h_change,
           price_change_percentage_24h: coinData.usd_24h_change,
           total_volume: 2000000000,
           market_cap: coinData.usd * (symbol === 'BTC/USD' ? 21000000 : symbol === 'ETH/USD' ? 120000000 : 150000000),
         };
+        
+        // Cache the result
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data: result,
+          timestamp: now
+        }));
+        
+        console.log(`[DIRECT API] ${symbol} success: $${coinData.usd} (${coinData.usd_24h_change}%)`);
+        return result;
       }
     }
   } catch (error) {
     console.error(`[DIRECT API] ${symbol} CoinGecko failed:`, error);
+    
+    // If we have cached data, use it even if expired
+    if (cached) {
+      try {
+        const { data } = JSON.parse(cached);
+        console.log(`[DIRECT API] Using expired cache for ${symbol}: $${data.current_price}`);
+        return data;
+      } catch (e) {
+        // Cache is corrupted, continue to fallback
+      }
+    }
   }
   
   // Final fallback

@@ -35,11 +35,11 @@ export default function LeftSidebar() {
   const { data: marketTickers, isLoading: isLoadingPrices } = useQuery({
     queryKey: ['market-prices'],
     queryFn: getMarketPrices,
-    refetchInterval: 5000, // Refresh every 5 seconds (sync with chart)
-    staleTime: 0, // Always consider data stale to force fresh requests
-    gcTime: 0, // Disable cache completely (formerly cacheTime)
+    refetchInterval: 30000, // Refresh every 30 seconds (reduced from 5s to avoid rate limiting)
+    staleTime: 20000, // Consider data stale after 20 seconds
+    gcTime: 60000, // Keep cache for 1 minute
     refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnWindowFocus: false, // Don't refetch on focus to reduce API calls
   });
 
   const handleNavClick = (navId: string, available: boolean) => {
