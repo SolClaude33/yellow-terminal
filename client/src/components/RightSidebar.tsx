@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Trophy, MessageSquare, Wallet, User, LogOut, Loader2 } from "lucide-react";
-import cyberAvatar from "@assets/generated_images/Cyberpunk_trader_avatar_9c40e50f.png";
+// import cyberAvatar from "@assets/generated_images/Cyberpunk_trader_avatar_9c40e50f.png";
 import { useWallet } from "@/hooks/useWallet";
 import { useWalletBalance } from "@/hooks/useWalletBalance";
 import { usePortfolioAnalyzer } from "@/hooks/usePortfolioAnalyzer";
@@ -77,7 +77,7 @@ export default function RightSidebar() {
       <Card className="p-4 cyber-border">
         <div className="text-center">
           <Avatar className="w-20 h-20 mx-auto mb-3 cyber-border">
-            <AvatarImage src={cyberAvatar} alt="User Avatar" />
+            <AvatarImage src="/placeholder-avatar.png" alt="User Avatar" />
             <AvatarFallback>CX</AvatarFallback>
           </Avatar>
           {!connected ? (

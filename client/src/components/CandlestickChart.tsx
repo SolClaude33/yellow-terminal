@@ -101,16 +101,10 @@ export default function CandlestickChart() {
             unit: selectedTimeframe === '1m' ? 'minute' :
                   selectedTimeframe === '5m' || selectedTimeframe === '15m' ? 'minute' :
                   selectedTimeframe === '1h' || selectedTimeframe === '4h' ? 'hour' : 'day',
-            stepSize: selectedTimeframe === '1m' ? 5 :
-                      selectedTimeframe === '5m' ? 1 :
-                      selectedTimeframe === '15m' ? 1 :
-                      selectedTimeframe === '1h' ? 1 :
-                      selectedTimeframe === '4h' ? 1 : undefined,
           },
           grid: {
             color: 'rgba(0, 212, 255, 0.08)',
             lineWidth: 1,
-            drawBorder: false,
           },
           border: {
             display: false,
@@ -131,7 +125,6 @@ export default function CandlestickChart() {
           grid: {
             color: 'rgba(0, 212, 255, 0.08)',
             lineWidth: 1,
-            drawBorder: false,
           },
           border: {
             display: false,
@@ -227,7 +220,7 @@ export default function CandlestickChart() {
                 borderColor: change >= 0 ? '#00ff88' : '#ff4444',
                 backgroundColor: change >= 0 ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 68, 68, 0.1)',
                 borderWidth: 1,
-                borderDash: [],
+                borderDash: [0, 0],
                 borderRadius: 4
               };
             }
@@ -247,7 +240,7 @@ export default function CandlestickChart() {
           pan: {
             enabled: true,
             mode: 'x',
-            modifierKey: null, // Remove modifier key requirement for panning
+            modifierKey: 'ctrl', // Use Ctrl key for panning
           },
           limits: {
             x: {

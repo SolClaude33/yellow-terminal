@@ -6,17 +6,17 @@ import { Activity, TrendingUp, Zap, Settings, User, BarChart3, Lock } from "luci
 import { useQuery } from "@tanstack/react-query";
 import { getMarketPrices } from "@/lib/cryptoApi";
 import { useTradingSymbol } from "@/contexts/TradingSymbolContext";
-import bnbCoinImage from "@assets/generated_images/BNB_golden_crypto_coin_4f9518a8.png";
-import bscNetworkImage from "@assets/generated_images/BSC_blockchain_network_cyberpunk_f3ecbaf6.png";
-import bnbTraderImage from "@assets/generated_images/BNB_crypto_trader_character_e463cb87.png";
-import bnbRocketImage from "@assets/generated_images/BNB_rocket_to_moon_aff6425b.png";
+// import bnbCoinImage from "@assets/generated_images/BNB_golden_crypto_coin_4f9518a8.png";
+// import bscNetworkImage from "@assets/generated_images/BSC_blockchain_network_cyberpunk_f3ecbaf6.png";
+// import bnbTraderImage from "@assets/generated_images/BNB_crypto_trader_character_e463cb87.png";
+// import bnbRocketImage from "@assets/generated_images/BNB_rocket_to_moon_aff6425b.png";
 
 export default function LeftSidebar() {
   const [activeNav, setActiveNav] = useState('trading');
   const [currentMeme, setCurrentMeme] = useState(0);
   const { selectedSymbol, setSelectedSymbol } = useTradingSymbol();
   
-  const memes = [bnbCoinImage, bscNetworkImage, bnbTraderImage, bnbRocketImage];
+  const memes = ["/placeholder-meme-1.png", "/placeholder-meme-2.png", "/placeholder-meme-3.png", "/placeholder-meme-4.png"];
 
   const navItems = [
     { id: 'trading', label: 'TRADING', icon: TrendingUp, available: true },
