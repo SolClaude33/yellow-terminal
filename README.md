@@ -10,7 +10,8 @@ A modern, cyberpunk-themed cryptocurrency trading dashboard built with React, Ty
 
 ## ✨ Features
 
-- **Real-time Crypto Prices**: Live data for BTC, ETH, SOL, and PUMP tokens
+- **Real-time Crypto Prices**: Live data for BTC, ETH, BNB, and FOUR tokens
+- **FOUR Token Integration**: Special DexScreener API integration for real-time FOUR token data
 - **Interactive Charts**: Candlestick charts with zoom and pan functionality
 - **Fear & Greed Index**: Dynamic market sentiment calculation based on price movements
 - **Cyberpunk UI**: Dark theme with neon accents and matrix rain effects
@@ -24,7 +25,7 @@ A modern, cyberpunk-themed cryptocurrency trading dashboard built with React, Ty
 - **Styling**: Tailwind CSS, Custom CSS animations
 - **Charts**: Chart.js with financial plugins
 - **Data Fetching**: TanStack Query (React Query)
-- **APIs**: CryptoCompare, CoinGecko, Birdeye
+- **APIs**: CryptoCompare, CoinGecko, DexScreener
 
 ## 🚀 Quick Start
 
@@ -120,6 +121,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - CryptoCompare for market data API
 - CoinGecko for additional crypto data
+- DexScreener for real-time DEX data (especially FOUR token)
 - Chart.js for chart functionality
 - Tailwind CSS for styling framework
 
