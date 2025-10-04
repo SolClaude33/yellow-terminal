@@ -302,6 +302,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // STATIC FALLBACK: Always working endpoints for Vercel
+  app.get('/api/crypto/static-price', (req, res) => {
+    const symbol = req.query.symbol as string || 'BNB/USD';
+    console.log(`[Static] Serving static price for ${symbol}`);
+    
+    const staticData = {
+      'BTC/USD': {
+        current_price: 122000,
+        price_change_24h: -366,
+        price_change_percentage_24h: -0.3,
+        total_volume: 28500000000,
+        market_cap: 2400000000000
+      },
+      'ETH/USD': {
+        current_price: 4480,
+        price_change_24h: -40.32,
+        price_change_percentage_24h: -0.9,
+        total_volume: 15000000000,
+        market_cap: 540000000000
+      },
+      'BNB/USD': {
+        current_price: 1150,
+        price_change_24h: -29.5,
+        price_change_percentage_24h: -2.5,
+        total_volume: 2000000000,
+        market_cap: 170000000000
+      },
+      'FOUR': {
+        current_price: 0.1558,
+        price_change_24h: -0.0178,
+        price_change_percentage_24h: -10.22,
+        total_volume: 15000000,
+        market_cap: 155800000
+      }
+    };
+
+    const data = staticData[symbol] || staticData['BNB/USD'];
+    res.json(data);
+  });
+
+  app.get('/api/crypto/static-market-prices', (req, res) => {
+    console.log('[Static] Serving static market prices');
+    
+    const staticData = [
+      { symbol: 'BTC/USD', price: 122000, change: -0.3 },
+      { symbol: 'ETH/USD', price: 4480, change: -0.9 },
+      { symbol: 'BNB/USD', price: 1150, change: -2.5 },
+      { symbol: 'FOUR', price: 0.1558, change: -10.22 }
+    ];
+
+    res.json({
+      data: staticData,
+      timestamp: Date.now(),
+      source: 'static',
+      message: 'Using static data - APIs unavailable'
+    });
+  });
+
+  app.get('/api/crypto/static-chart', (req, res) => {
+    const symbol = req.query.symbol as string || 'BNB/USD';
+    const timeframe = req.query.timeframe as string || '1h';
+    console.log(`[Static] Serving static chart for ${symbol} (${timeframe})`);
+    
+    // Generate static candlestick data
+    const now = Date.now();
+    const hoursBack = timeframe === '1h' ? 24 : timeframe === '4h' ? 96 : 168;
+    const intervalMs = timeframe === '1h' ? 3600000 : timeframe === '4h' ? 14400000 : 3600000;
+    
+    const candles = [];
+    let basePrice = 1150; // Start with BNB price
+    
+    if (symbol === 'FOUR') {
+      basePrice = 0.1558;
+    } else if (symbol === 'BTC/USD') {
+      basePrice = 122000;
+    } else if (symbol === 'ETH/USD') {
+      basePrice = 4480;
+    }
+    
+    for (let i = hoursBack; i >= 0; i--) {
+      const timestamp = now - (i * intervalMs);
+      const variation = (Math.random() - 0.5) * 0.1; // ±5% variation
+      const open = basePrice;
+      const close = basePrice * (1 + variation);
+      const high = Math.max(open, close) * (1 + Math.random() * 0.05);
+      const low = Math.min(open, close) * (1 - Math.random() * 0.05);
+      
+      candles.push({
+        timestamp,
+        open,
+        high,
+        low,
+        close
+      });
+      
+      basePrice = close; // Next candle starts where this one ended
+    }
+    
+    res.json(candles);
+  });
+
   // Proxy endpoint for crypto price data (uses CryptoCompare for major coins including BNB, Birdeye for Solana-specific tokens, fallback to CoinGecko)
   app.get('/api/crypto/price', async (req, res) => {
     try {
