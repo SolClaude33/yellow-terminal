@@ -65,30 +65,29 @@ async function getFourPriceFromDexScreener(): Promise<{ price: number; change: n
   try {
     console.log('[Price] Fetching FOUR price from DexScreener...');
     
-    // Use internal proxy for Vercel serverless compatibility
-    const isProduction = process.env.NODE_ENV === 'production';
-    const baseUrl = isProduction ? 'https://www.yellowterminal.com' : 'http://localhost:5000';
-    
+    // Try direct DexScreener API first
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for proxy
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
-    const response = await fetch(`${baseUrl}/api/proxy/dexscreener?address=${FOUR_TOKEN_ADDRESS}`, {
+    const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${FOUR_TOKEN_ADDRESS}`, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Cybertrade/1.0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
       }
     });
     
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      console.error(`[Price] DexScreener proxy error: ${response.status} ${response.statusText}`);
+      console.error(`[Price] DexScreener direct error: ${response.status} ${response.statusText}`);
       return null;
     }
     
     const data = await response.json();
-    console.log('[Price] DexScreener proxy response:', JSON.stringify(data, null, 2));
+    console.log('[Price] DexScreener direct response received');
     
     if (data.pairs && data.pairs.length > 0) {
       // Get the first pair (most liquid)
@@ -107,6 +106,41 @@ async function getFourPriceFromDexScreener(): Promise<{ price: number; change: n
     if (error instanceof Error && error.name === 'AbortError') {
       console.error('[Price] DexScreener request timed out');
     }
+    
+    // Fallback: Try using AllOrigins proxy for CORS
+    try {
+      console.log('[Price] Trying AllOrigins proxy for DexScreener...');
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.dexscreener.com/latest/dex/tokens/${FOUR_TOKEN_ADDRESS}`)}`;
+      
+      const proxyController = new AbortController();
+      const proxyTimeoutId = setTimeout(() => proxyController.abort(), 10000);
+      
+      const proxyResponse = await fetch(proxyUrl, {
+        signal: proxyController.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
+        }
+      });
+      
+      clearTimeout(proxyTimeoutId);
+      
+      if (proxyResponse.ok) {
+        const proxyData = await proxyResponse.json();
+        
+        if (proxyData.pairs && proxyData.pairs.length > 0) {
+          const pair = proxyData.pairs[0];
+          const price = parseFloat(pair.priceUsd);
+          const change24h = parseFloat(pair.priceChange?.h24 || '0');
+          
+          console.log(`[Price] AllOrigins proxy success for FOUR: $${price} (${change24h}%)`);
+          return { price, change: change24h };
+        }
+      }
+    } catch (proxyError) {
+      console.error('[Price] AllOrigins proxy also failed:', proxyError);
+    }
+    
     return null;
   }
 }
@@ -421,8 +455,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               signal: controller.signal,
               headers: {
-                'User-Agent': 'Cybertrade/1.0',
-                'Accept': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'cross-site',
               }
             }
           );
