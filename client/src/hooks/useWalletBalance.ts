@@ -24,6 +24,7 @@ interface WalletBalanceData {
   isLoading: boolean;
   error: Error | null;
   priceError: boolean;
+  priceData?: PriceData;
 }
 
 export function useWalletBalance(walletAddress: string | null): WalletBalanceData {
@@ -183,5 +184,6 @@ export function useWalletBalance(walletAddress: string | null): WalletBalanceDat
     isLoading: isLoadingBalance || isPriceLoading,
     error,
     priceError: !!priceError,
+    priceData, // Export price data for P&L calculation
   };
 }

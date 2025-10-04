@@ -15,7 +15,7 @@ import { UsernameDialog } from "./UsernameDialog";
 
 export default function RightSidebar() {
   const { walletAddress, connected, connecting, connect, disconnect } = useWallet();
-  const { bnb, usd, isLoading: balanceLoading } = useWalletBalance(walletAddress);
+  const { bnb, usd, isLoading: balanceLoading, priceData } = useWalletBalance(walletAddress);
   const { topHoldings, isLoading: portfolioLoading } = usePortfolioAnalyzer(walletAddress);
   const { pnlAmount, pnlPercentage, isLoading: pnlLoading } = usePnLCalculator(topHoldings);
   const { profile, hasProfile, needsProfile, isLoading: profileLoading, error: profileError } = useWalletProfile(walletAddress);
@@ -70,6 +70,10 @@ export default function RightSidebar() {
   };
 
   const totalPortfolioValue = topHoldings.reduce((sum, h) => sum + h.usdValue, 0);
+  
+  // Calculate P&L for wallet balance using BNB price change
+  const walletPnlPercentage = priceData?.price_change_percentage_24h || 0;
+  const walletPnlAmount = usd * (walletPnlPercentage / 100);
 
   return (
     <aside className="w-full h-full bg-sidebar cyber-border p-4 space-y-4 cyber-scrollbar overflow-y-auto">
@@ -129,16 +133,16 @@ export default function RightSidebar() {
                   <div className="text-muted-foreground">Balance</div>
                 </div>
                 <div className="text-center">
-                  {pnlLoading ? (
+                  {balanceLoading ? (
                     <div className="text-cyber-success font-cyber">
                       <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                     </div>
                   ) : (
                     <div 
-                      className={`font-cyber ${pnlPercentage >= 0 ? 'text-cyber-success' : 'text-cyber-error'}`}
+                      className={`font-cyber ${walletPnlPercentage >= 0 ? 'text-cyber-success' : 'text-cyber-error'}`}
                       data-testid="text-pnl-percentage"
                     >
-                      {pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%
+                      {walletPnlPercentage >= 0 ? '+' : ''}{walletPnlPercentage.toFixed(2)}%
                     </div>
                   )}
                   <div className="text-muted-foreground">24h P&L</div>
