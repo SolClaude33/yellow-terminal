@@ -266,6 +266,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Test wallet balance endpoint
+  app.post('/api/test/wallet-balance', async (req, res) => {
+    try {
+      const { walletAddress } = req.body;
+      
+      if (!walletAddress) {
+        return res.status(400).json({ error: 'Wallet address is required' });
+      }
+
+      console.log(`[Test] Testing wallet balance for: ${walletAddress}`);
+      
+      // Test BSC RPC endpoints
+      const endpoints = [
+        'https://bsc-dataseed.binance.org/',
+        'https://bsc-dataseed1.defibit.io/',
+        'https://bsc-dataseed1.ninicoin.io/',
+      ];
+
+      const rpcRequest = {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_getBalance',
+        params: [walletAddress, 'latest'],
+      };
+
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`[Test] Trying ${endpoint}...`);
+          
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            },
+            body: JSON.stringify(rpcRequest),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data.error) {
+              console.log(`[Test] ${endpoint} returned error:`, data.error);
+              continue;
+            }
+
+            const balanceWei = BigInt(data.result || '0x0');
+            const bnbBalance = Number(balanceWei) / Number(BigInt(10 ** 18));
+            
+            console.log(`[Test] ${endpoint} success: ${bnbBalance} BNB`);
+            
+            return res.json({
+              status: 'success',
+              endpoint,
+              balance: bnbBalance,
+              balanceWei: data.result,
+              walletAddress
+            });
+          } else {
+            console.log(`[Test] ${endpoint} failed with status: ${response.status}`);
+          }
+        } catch (error) {
+          console.log(`[Test] ${endpoint} error:`, error);
+        }
+      }
+      
+      res.status(500).json({
+        status: 'error',
+        message: 'All BSC RPC endpoints failed',
+        walletAddress
+      });
+      
+    } catch (error) {
+      console.error('[Test] Wallet balance test error:', error);
+      res.status(500).json({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // CORS proxy for external APIs (Vercel serverless fix)
   app.get('/api/proxy/dexscreener', async (req, res) => {
     try {

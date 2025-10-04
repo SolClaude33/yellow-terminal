@@ -6,7 +6,8 @@ const BSC_RPC_ENDPOINTS = [
   'https://bsc-dataseed.binance.org/',
   'https://bsc-dataseed1.defibit.io/',
   'https://bsc-dataseed1.ninicoin.io/',
-  '/api/bsc-rpc-proxy' // Fallback to our proxy
+  '/api/bsc-rpc-proxy', // Fallback to our proxy
+  '/api/test/wallet-balance' // Final fallback to our test endpoint
 ];
 const WEI_PER_BNB = BigInt(10 ** 18);
 
@@ -62,35 +63,70 @@ export function useWalletBalance(walletAddress: string | null): WalletBalanceDat
           try {
             console.log(`[useWalletBalance] Trying endpoint: ${endpoint}`);
             
-            const response = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-              },
-              body: JSON.stringify(rpcRequest),
-            });
+            let response;
+            let data;
+            
+            if (endpoint === '/api/test/wallet-balance') {
+              // Special handling for our test endpoint
+              response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ walletAddress }),
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              data = await response.json();
+              
+              if (data.status === 'error') {
+                throw new Error(data.message || 'Failed to fetch balance');
+              }
+              
+              const bnbBalance = data.balance;
+              console.log(`[useWalletBalance] Success with ${endpoint}: ${bnbBalance} BNB`);
+              
+              if (isMounted) {
+                setBnb(bnbBalance);
+                setError(null);
+              }
+              return; // Success, exit the function
+              
+            } else {
+              // Standard RPC endpoints
+              response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                },
+                body: JSON.stringify(rpcRequest),
+              });
 
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.error) {
-              throw new Error(data.error.message || 'Failed to fetch balance');
-            }
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              data = await response.json();
+              
+              if (data.error) {
+                throw new Error(data.error.message || 'Failed to fetch balance');
+              }
 
-            const balanceWei = BigInt(data.result || '0x0');
-            const bnbBalance = Number(balanceWei) / Number(WEI_PER_BNB);
-            
-            console.log(`[useWalletBalance] Success with ${endpoint}: ${bnbBalance} BNB`);
-            
-            if (isMounted) {
-              setBnb(bnbBalance);
-              setError(null);
+              const balanceWei = BigInt(data.result || '0x0');
+              const bnbBalance = Number(balanceWei) / Number(WEI_PER_BNB);
+              
+              console.log(`[useWalletBalance] Success with ${endpoint}: ${bnbBalance} BNB`);
+              
+              if (isMounted) {
+                setBnb(bnbBalance);
+                setError(null);
+              }
+              return; // Success, exit the function
             }
-            return; // Success, exit the function
             
           } catch (err) {
             console.error(`[useWalletBalance] Failed with ${endpoint}:`, err);
