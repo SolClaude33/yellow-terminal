@@ -104,7 +104,7 @@ async function getFourPriceFromDexScreener(): Promise<{ price: number; change: n
     return null;
   } catch (error) {
     console.error('[Price] DexScreener error:', error);
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       console.error('[Price] DexScreener request timed out');
     }
     return null;
