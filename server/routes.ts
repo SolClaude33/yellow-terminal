@@ -172,6 +172,48 @@ async function getFourChartFromDexScreener(timeframe: string): Promise<any[] | n
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Test endpoint to verify API connectivity
+  app.get('/api/test/dexscreener', async (req, res) => {
+    try {
+      console.log('[Test] Testing DexScreener API connectivity...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch('https://api.dexscreener.com/latest/dex/tokens/0x0A43fC31a73013089DF59194872Ecae4cAe14444', {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Cybertrade/1.0',
+          'Accept': 'application/json',
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        res.json({ 
+          status: 'success', 
+          response: data,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+      } else {
+        res.json({ 
+          status: 'error', 
+          statusCode: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+      }
+    } catch (error) {
+      console.error('[Test] DexScreener test error:', error);
+      res.json({ 
+        status: 'error', 
+        error: error.message,
+        type: error.name
+      });
+    }
+  });
+
   // Proxy endpoint for crypto price data (uses CryptoCompare for major coins including BNB, Birdeye for Solana-specific tokens, fallback to CoinGecko)
   app.get('/api/crypto/price', async (req, res) => {
     try {
