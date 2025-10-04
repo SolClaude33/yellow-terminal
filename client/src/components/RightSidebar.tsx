@@ -77,7 +77,7 @@ export default function RightSidebar() {
       <Card className="p-4 cyber-border">
         <div className="text-center">
           <Avatar className="w-20 h-20 mx-auto mb-3 cyber-border">
-            <AvatarImage src="/placeholder-avatar.png" alt="User Avatar" />
+            <AvatarImage src="/memes/Cyberpunk_trader_avatar_9c40e50f.png" alt="User Avatar" />
             <AvatarFallback>CX</AvatarFallback>
           </Avatar>
           {!connected ? (

@@ -16,7 +16,12 @@ export default function LeftSidebar() {
   const [currentMeme, setCurrentMeme] = useState(0);
   const { selectedSymbol, setSelectedSymbol } = useTradingSymbol();
   
-  const memes = ["/placeholder-meme-1.png", "/placeholder-meme-2.png", "/placeholder-meme-3.png", "/placeholder-meme-4.png"];
+  const memes = [
+    "/memes/BNB_golden_crypto_coin_4f9518a8.png",
+    "/memes/BSC_blockchain_network_cyberpunk_f3ecbaf6.png", 
+    "/memes/BNB_crypto_trader_character_e463cb87.png",
+    "/memes/BNB_rocket_to_moon_aff6425b.png"
+  ];
 
   const navItems = [
     { id: 'trading', label: 'TRADING', icon: TrendingUp, available: true },
