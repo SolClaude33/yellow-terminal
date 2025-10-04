@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { getRealTimePrice } from '@/lib/cryptoApi';
 
 // Using direct BSC RPC calls with fallback to proxy
 const BSC_RPC_ENDPOINTS = [
@@ -31,8 +32,11 @@ export function useWalletBalance(walletAddress: string | null): WalletBalanceDat
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
   const { data: priceData, isLoading: isPriceLoading, error: priceError } = useQuery<PriceData>({
-    queryKey: ['/api/crypto/price'],
-    refetchInterval: 10000,
+    queryKey: ['/api/crypto/price', 'BNB/USD'],
+    queryFn: () => getRealTimePrice('BNB/USD'),
+    refetchInterval: 30000, // Reduced frequency
+    staleTime: 20000,
+    gcTime: 60000,
   });
 
   useEffect(() => {
@@ -163,8 +167,14 @@ export function useWalletBalance(walletAddress: string | null): WalletBalanceDat
 
   const usd = useMemo(() => {
     const bnbPrice = priceData?.current_price;
-    if (!bnbPrice || priceError) return 0;
-    return bnb * bnbPrice;
+    console.log(`[useWalletBalance] USD calculation - BNB: ${bnb}, Price: ${bnbPrice}, PriceError: ${priceError}`);
+    if (!bnbPrice || priceError) {
+      console.log(`[useWalletBalance] USD calculation failed - no price data or error`);
+      return 0;
+    }
+    const calculatedUsd = bnb * bnbPrice;
+    console.log(`[useWalletBalance] USD calculated: ${calculatedUsd} (${bnb} BNB * $${bnbPrice})`);
+    return calculatedUsd;
   }, [bnb, priceData, priceError]);
 
   return {
