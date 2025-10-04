@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, TrendingDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getRealTimePrice, getFearGreedIndex } from "@/lib/cryptoApi";
+import { getRealTimePrice } from "@/lib/cryptoApi";
+import { useMarketSentiment } from "@/hooks/useMarketSentiment";
 import { useLivePrice } from "@/hooks/useLivePrice";
 import { useTradingSymbol } from "@/contexts/TradingSymbolContext";
 import CandlestickChart from "./CandlestickChart";
@@ -29,12 +30,8 @@ export default function MainContent() {
     refetchInterval: 5000, // Refresh every 5 seconds (more stable)
   });
 
-  // Fetch Fear & Greed Index
-  const { data: fearGreedData } = useQuery({
-    queryKey: ['fear-greed-index'],
-    queryFn: getFearGreedIndex,
-    refetchInterval: 300000, // Refresh every 5 minutes
-  });
+  // Fetch Market Sentiment
+  const marketSentiment = useMarketSentiment();
 
   // Auto-scroll news
   useEffect(() => {
@@ -126,11 +123,11 @@ export default function MainContent() {
         </div>
       </Card>
 
-      {/* Market Sentiment - Fear & Greed Index */}
+      {/* Market Sentiment - Calculated from Price Changes */}
       <Card className="p-6 cyber-border">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-cyber cyber-glow">MARKET SENTIMENT</h2>
-          <Badge className="text-xs" data-testid="badge-sentiment-source">Fear & Greed Index</Badge>
+          <Badge className="text-xs" data-testid="badge-sentiment-source">Price Analysis</Badge>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex-1">
@@ -138,16 +135,19 @@ export default function MainContent() {
               <span className="text-sm font-mono text-cyber-danger">FEAR</span>
               <span className="text-sm font-mono text-cyber-success">GREED</span>
             </div>
-            <Progress value={fearGreedData?.value || 50} className="h-3" />
+            <Progress value={marketSentiment.value} className="h-3" />
           </div>
           <div className="text-right">
             <div className="text-2xl font-cyber cyber-glow" data-testid="text-sentiment-value">
-              {fearGreedData?.value || '...'}
+              {marketSentiment.isLoading ? '...' : marketSentiment.value}
             </div>
             <div className="text-xs font-mono text-muted-foreground" data-testid="text-sentiment-classification">
-              {fearGreedData?.classification || 'Loading...'}
+              {marketSentiment.isLoading ? 'Calculating...' : marketSentiment.classification}
             </div>
           </div>
+        </div>
+        <div className="mt-3 text-xs text-muted-foreground font-mono">
+          {marketSentiment.description}
         </div>
       </Card>
 
