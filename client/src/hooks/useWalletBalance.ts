@@ -1,8 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-// Using backend proxy to bypass CORS restrictions
-const BSC_RPC_ENDPOINT = '/api/bsc-rpc-proxy';
+// Using direct BSC RPC calls with fallback to proxy
+const BSC_RPC_ENDPOINTS = [
+  'https://bsc-dataseed.binance.org/',
+  'https://bsc-dataseed1.defibit.io/',
+  'https://bsc-dataseed1.ninicoin.io/',
+  '/api/bsc-rpc-proxy' // Fallback to our proxy
+];
 const WEI_PER_BNB = BigInt(10 ** 18);
 
 interface PriceData {
@@ -43,35 +48,62 @@ export function useWalletBalance(walletAddress: string | null): WalletBalanceDat
         setIsLoadingBalance(true);
         setError(null);
         
-        const response = await fetch(BSC_RPC_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'eth_getBalance',
-            params: [walletAddress, 'latest'],
-          }),
-        });
+        const rpcRequest = {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'eth_getBalance',
+          params: [walletAddress, 'latest'],
+        };
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        let lastError: Error | null = null;
         
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error.message || 'Failed to fetch balance');
-        }
+        // Try each endpoint until one works
+        for (const endpoint of BSC_RPC_ENDPOINTS) {
+          try {
+            console.log(`[useWalletBalance] Trying endpoint: ${endpoint}`);
+            
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              },
+              body: JSON.stringify(rpcRequest),
+            });
 
-        const balanceWei = BigInt(data.result || '0x0');
-        const bnbBalance = Number(balanceWei) / Number(WEI_PER_BNB);
-        
-        if (isMounted) {
-          setBnb(bnbBalance);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+              throw new Error(data.error.message || 'Failed to fetch balance');
+            }
+
+            const balanceWei = BigInt(data.result || '0x0');
+            const bnbBalance = Number(balanceWei) / Number(WEI_PER_BNB);
+            
+            console.log(`[useWalletBalance] Success with ${endpoint}: ${bnbBalance} BNB`);
+            
+            if (isMounted) {
+              setBnb(bnbBalance);
+              setError(null);
+            }
+            return; // Success, exit the function
+            
+          } catch (err) {
+            console.error(`[useWalletBalance] Failed with ${endpoint}:`, err);
+            lastError = err as Error;
+            continue; // Try next endpoint
+          }
         }
+        
+        // If we get here, all endpoints failed
+        throw lastError || new Error('All BSC RPC endpoints failed');
+        
       } catch (err) {
-        console.error('[useWalletBalance] Error fetching balance:', err);
+        console.error('[useWalletBalance] All endpoints failed:', err);
         if (isMounted) {
           setError(err as Error);
           setBnb(0);
