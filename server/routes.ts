@@ -60,89 +60,94 @@ const SYMBOL_TO_COINGECKO_ID: { [key: string]: string } = {
 // DexScreener token address for FOUR
 const FOUR_TOKEN_ADDRESS = '0x0A43fC31a73013089DF59194872Ecae4cAe14444';
 
-// Function to get FOUR price from DexScreener
-async function getFourPriceFromDexScreener(): Promise<{ price: number; change: number } | null> {
+// Function to get FOUR price from multiple sources
+async function getFourPriceFromMultipleSources(): Promise<{ price: number; change: number } | null> {
+  console.log('[Price] Fetching FOUR price from multiple sources...');
+  
+  // Try CoinGecko first (usually works better in Vercel)
   try {
-    console.log('[Price] Fetching FOUR price from DexScreener...');
-    
-    // Try direct DexScreener API first
+    console.log('[Price] Trying CoinGecko for FOUR...');
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=four&vs_currencies=usd&include_24hr_change=true', {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.four) {
+        const price = data.four.usd;
+        const change = data.four.usd_24h_change;
+        console.log(`[Price] CoinGecko success for FOUR: $${price} (${change}%)`);
+        return { price, change };
+      }
+    }
+  } catch (error) {
+    console.error('[Price] CoinGecko failed:', error);
+  }
+  
+  // Try DexScreener as fallback
+  try {
+    console.log('[Price] Trying DexScreener for FOUR...');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     
     const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${FOUR_TOKEN_ADDRESS}`, {
       signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'no-cache',
       }
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) {
-      console.error(`[Price] DexScreener direct error: ${response.status} ${response.statusText}`);
-      return null;
-    }
-    
-    const data = await response.json();
-    console.log('[Price] DexScreener direct response received');
-    
-    if (data.pairs && data.pairs.length > 0) {
-      // Get the first pair (most liquid)
-      const pair = data.pairs[0];
-      const price = parseFloat(pair.priceUsd);
-      const change24h = parseFloat(pair.priceChange?.h24 || '0');
-      
-      console.log(`[Price] DexScreener success for FOUR: $${price} (${change24h}%)`);
-      return { price, change: change24h };
-    }
-    
-    console.log('[Price] No pairs found in DexScreener response');
-    return null;
-  } catch (error) {
-    console.error('[Price] DexScreener error:', error);
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.error('[Price] DexScreener request timed out');
-    }
-    
-    // Fallback: Try using AllOrigins proxy for CORS
-    try {
-      console.log('[Price] Trying AllOrigins proxy for DexScreener...');
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.dexscreener.com/latest/dex/tokens/${FOUR_TOKEN_ADDRESS}`)}`;
-      
-      const proxyController = new AbortController();
-      const proxyTimeoutId = setTimeout(() => proxyController.abort(), 10000);
-      
-      const proxyResponse = await fetch(proxyUrl, {
-        signal: proxyController.signal,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept': 'application/json',
-        }
-      });
-      
-      clearTimeout(proxyTimeoutId);
-      
-      if (proxyResponse.ok) {
-        const proxyData = await proxyResponse.json();
-        
-        if (proxyData.pairs && proxyData.pairs.length > 0) {
-          const pair = proxyData.pairs[0];
-          const price = parseFloat(pair.priceUsd);
-          const change24h = parseFloat(pair.priceChange?.h24 || '0');
-          
-          console.log(`[Price] AllOrigins proxy success for FOUR: $${price} (${change24h}%)`);
-          return { price, change: change24h };
-        }
+    if (response.ok) {
+      const data = await response.json();
+      if (data.pairs && data.pairs.length > 0) {
+        const pair = data.pairs[0];
+        const price = parseFloat(pair.priceUsd);
+        const change24h = parseFloat(pair.priceChange?.h24 || '0');
+        console.log(`[Price] DexScreener success for FOUR: $${price} (${change24h}%)`);
+        return { price, change: change24h };
       }
-    } catch (proxyError) {
-      console.error('[Price] AllOrigins proxy also failed:', proxyError);
     }
-    
-    return null;
+  } catch (error) {
+    console.error('[Price] DexScreener failed:', error);
   }
+  
+  // Try CoinMarketCap as last resort
+  try {
+    console.log('[Price] Trying CoinMarketCap for FOUR...');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
+    const response = await fetch('https://coinmarketcap.com/currencies/four/', {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (response.ok) {
+      // This would require HTML parsing, but let's keep it simple for now
+      console.log('[Price] CoinMarketCap response received (would need parsing)');
+    }
+  } catch (error) {
+    console.error('[Price] CoinMarketCap failed:', error);
+  }
+  
+  return null;
 }
 
 // Function to get FOUR chart data from DexScreener
@@ -152,7 +157,7 @@ async function getFourChartFromDexScreener(timeframe: string): Promise<any[] | n
     
     // DexScreener doesn't have historical data API, so we'll generate synthetic data
     // based on current price and volatility
-    const priceData = await getFourPriceFromDexScreener();
+    const priceData = await getFourPriceFromMultipleSources();
     
     if (!priceData) {
       return null;
@@ -219,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await fetch('https://api.dexscreener.com/latest/dex/tokens/0x0A43fC31a73013089DF59194872Ecae4cAe14444', {
         signal: controller.signal,
         headers: {
-          'User-Agent': 'Cybertrade/1.0',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'application/json',
         }
       });
@@ -241,14 +246,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           headers: Object.fromEntries(response.headers.entries())
         });
       }
-        } catch (error) {
-          console.error('[Test] DexScreener test error:', error);
-          res.json({ 
-            status: 'error', 
-            error: error instanceof Error ? error.message : 'Unknown error',
-            type: error instanceof Error ? error.name : 'Unknown'
-          });
-        }
+    } catch (error) {
+      console.error('[Test] DexScreener test error:', error);
+      res.json({ 
+        status: 'error', 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        type: error instanceof Error ? error.name : 'Unknown'
+      });
+    }
+  });
+
+  // Simple test endpoint that always works
+  app.get('/api/test/simple', (req, res) => {
+    res.json({ 
+      status: 'success', 
+      message: 'API is working',
+      timestamp: Date.now(),
+      environment: process.env.NODE_ENV || 'unknown'
+    });
   });
 
   // CORS proxy for external APIs (Vercel serverless fix)
@@ -538,7 +553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (symbol === 'FOUR') {
         console.log(`[Price] Trying DexScreener for ${symbol}`);
         try {
-          const fourData = await getFourPriceFromDexScreener();
+          const fourData = await getFourPriceFromMultipleSources();
           
           if (fourData) {
             console.log(`[Price] DexScreener success for ${symbol}: $${fourData.price}`);
@@ -1179,7 +1194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add FOUR with real-time price from DexScreener
       try {
         console.log('[Market Prices] Fetching FOUR data from DexScreener...');
-        const fourData = await getFourPriceFromDexScreener();
+        const fourData = await getFourPriceFromMultipleSources();
         
         if (fourData) {
           marketData.push({
