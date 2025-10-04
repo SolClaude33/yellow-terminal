@@ -207,14 +207,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           headers: Object.fromEntries(response.headers.entries())
         });
       }
-    } catch (error) {
-      console.error('[Test] DexScreener test error:', error);
-      res.json({ 
-        status: 'error', 
-        error: error.message,
-        type: error.name
-      });
-    }
+        } catch (error) {
+          console.error('[Test] DexScreener test error:', error);
+          res.json({ 
+            status: 'error', 
+            error: error instanceof Error ? error.message : 'Unknown error',
+            type: error instanceof Error ? error.name : 'Unknown'
+          });
+        }
   });
 
   // CORS proxy for external APIs (Vercel serverless fix)
@@ -253,8 +253,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('[Proxy] DexScreener proxy error:', error);
       res.status(500).json({ 
         error: 'Proxy error',
-        message: error.message,
-        type: error.name
+        message: error instanceof Error ? error.message : 'Unknown error',
+        type: error instanceof Error ? error.name : 'Unknown'
       });
     }
   });
@@ -338,7 +338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     };
 
-    const data = staticData[symbol] || staticData['BNB/USD'];
+    const data = staticData[symbol as keyof typeof staticData] || staticData['BNB/USD'];
     res.json(data);
   });
 
@@ -446,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (cryptoCompareError) {
           console.warn(`[Price] CryptoCompare error for ${symbol}, trying next source:`, cryptoCompareError);
-          if (cryptoCompareError.name === 'AbortError') {
+          if (cryptoCompareError instanceof Error && cryptoCompareError.name === 'AbortError') {
             console.warn(`[Price] CryptoCompare request timed out for ${symbol}`);
           }
         }
