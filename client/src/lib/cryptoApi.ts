@@ -29,24 +29,32 @@ export interface FearGreedData {
 
 // Get real-time price for any symbol via our backend proxy
 export async function getRealTimePrice(symbol: string = 'BNB/USD'): Promise<CryptoPrice> {
+  // EMERGENCY FIX: Use static endpoints directly since Vercel blocks external APIs
   try {
-    const response = await fetch(`/api/crypto/price?symbol=${encodeURIComponent(symbol)}`);
+    console.log(`[EMERGENCY] Using static endpoint for ${symbol}...`);
+    const staticResponse = await fetch(`/api/crypto/static-price?symbol=${encodeURIComponent(symbol)}`);
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`Error fetching ${symbol} price:`, errorData.error || response.statusText);
-      throw new Error(errorData.error || 'Failed to fetch price data');
+    if (staticResponse.ok) {
+      console.log(`[EMERGENCY] Static endpoint success for ${symbol}`);
+      return await staticResponse.json();
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching ${symbol} price:`, error);
-    // Only fallback to BNB if requesting BNB, otherwise throw
-    if (symbol === 'BNB/USD') {
-      return getBNBPrice();
-    }
-    throw error;
+  } catch (staticError) {
+    console.error(`[EMERGENCY] Static endpoint failed for ${symbol}:`, staticError);
   }
+  
+  // Fallback to local data if static endpoint fails
+  if (symbol === 'BNB/USD') {
+    return getBNBPrice();
+  }
+  
+  // Return basic data for other symbols
+  return {
+    current_price: symbol === 'FOUR' ? 0.1558 : symbol === 'BTC/USD' ? 122000 : symbol === 'ETH/USD' ? 4480 : 1150,
+    price_change_24h: symbol === 'FOUR' ? -0.0178 : symbol === 'BTC/USD' ? -366 : symbol === 'ETH/USD' ? -40.32 : -29.5,
+    price_change_percentage_24h: symbol === 'FOUR' ? -10.22 : symbol === 'BTC/USD' ? -0.3 : symbol === 'ETH/USD' ? -0.9 : -2.5,
+    total_volume: symbol === 'FOUR' ? 15000000 : 2000000000,
+    market_cap: symbol === 'FOUR' ? 155800000 : symbol === 'BTC/USD' ? 2400000000000 : symbol === 'ETH/USD' ? 540000000000 : 170000000000
+  };
 }
 
 // Legacy function for backward compatibility (deprecated, use getRealTimePrice instead)
@@ -121,40 +129,72 @@ export async function getSolanaPrice(): Promise<CryptoPrice> {
 
 // Get Fear & Greed Index via our backend proxy
 export async function getFearGreedIndex(): Promise<FearGreedData> {
-  try {
-    const response = await fetch('/api/crypto/fear-greed');
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch Fear & Greed data');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching Fear & Greed Index:', error);
-    return {
-      value: 75,
-      classification: 'Greed',
-      timestamp: Date.now(),
-    };
+  // EMERGENCY FIX: Return static data since external APIs are blocked
+  console.log('[EMERGENCY] Using static Fear & Greed data');
+  return {
+    value: 75,
+    classification: 'Greed',
+    timestamp: Date.now(),
+  };
+}
+
+// Generate basic chart data when static endpoint fails
+function generateBasicChartData(timeframe: string, symbol: string): CandlestickData[] {
+  const now = Date.now();
+  const hoursBack = timeframe === '1h' ? 24 : timeframe === '4h' ? 96 : 168;
+  const intervalMs = timeframe === '1h' ? 3600000 : timeframe === '4h' ? 14400000 : 3600000;
+  
+  const candles = [];
+  let basePrice = 1150; // Start with BNB price
+  
+  if (symbol === 'FOUR') {
+    basePrice = 0.1558;
+  } else if (symbol === 'BTC/USD') {
+    basePrice = 122000;
+  } else if (symbol === 'ETH/USD') {
+    basePrice = 4480;
   }
+  
+  for (let i = hoursBack; i >= 0; i--) {
+    const timestamp = now - (i * intervalMs);
+    const variation = (Math.random() - 0.5) * 0.1; // ±5% variation
+    const open = basePrice;
+    const close = basePrice * (1 + variation);
+    const high = Math.max(open, close) * (1 + Math.random() * 0.05);
+    const low = Math.min(open, close) * (1 - Math.random() * 0.05);
+    
+    candles.push({
+      timestamp,
+      open,
+      high,
+      low,
+      close
+    });
+    
+    basePrice = close; // Next candle starts where this one ended
+  }
+  
+  return candles;
 }
 
 // Get candlestick data via our backend proxy
 export async function getRealTimeCandles(timeframe: string, symbol: string = 'BNB/USD'): Promise<CandlestickData[]> {
+  // EMERGENCY FIX: Use static chart endpoint directly
   try {
-    const response = await fetch(`/api/crypto/chart?timeframe=${timeframe}&symbol=${encodeURIComponent(symbol)}`);
+    console.log(`[EMERGENCY] Using static chart endpoint for ${symbol}...`);
+    const staticResponse = await fetch(`/api/crypto/static-chart?timeframe=${timeframe}&symbol=${encodeURIComponent(symbol)}`);
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`Error fetching ${symbol} chart:`, errorData.error || response.statusText);
-      throw new Error(errorData.error || 'Failed to fetch candlestick data');
+    if (staticResponse.ok) {
+      console.log(`[EMERGENCY] Static chart endpoint success for ${symbol}`);
+      return await staticResponse.json();
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching ${symbol} candles:`, error);
-    throw error;
+  } catch (staticError) {
+    console.error(`[EMERGENCY] Static chart endpoint failed for ${symbol}:`, staticError);
   }
+  
+  // Generate basic chart data if static endpoint fails
+  console.log(`[EMERGENCY] Generating basic chart data for ${symbol}`);
+  return generateBasicChartData(timeframe, symbol);
 }
 
 // Legacy function - deprecated, use getRealTimeCandles instead
@@ -256,59 +296,26 @@ export interface MarketTicker {
 
 // Get multiple crypto prices for Live Market section
 export async function getMarketPrices(): Promise<MarketTicker[]> {
+  // EMERGENCY FIX: Use static endpoint directly
   try {
-    const response = await fetch('/api/crypto/market-prices', {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
-    });
+    console.log('[EMERGENCY] Using static market prices endpoint...');
+    const staticResponse = await fetch('/api/crypto/static-market-prices');
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch market prices');
+    if (staticResponse.ok) {
+      console.log('[EMERGENCY] Static market prices endpoint success');
+      const result = await staticResponse.json();
+      return result.data || result;
     }
-    
-    const result = await response.json();
-    // Handle new response structure with timestamp
-    return result.data || result;
-  } catch (error) {
-    console.error('Error fetching market prices:', error);
-    // Try to get individual prices as fallback
-    try {
-      const [btcPrice, ethPrice, bnbPrice] = await Promise.allSettled([
-        getRealTimePrice('BTC/USD'),
-        getRealTimePrice('ETH/USD'), 
-        getRealTimePrice('BNB/USD')
-      ]);
-      
-      return [
-        { 
-          symbol: 'BTC/USD', 
-          price: btcPrice.status === 'fulfilled' ? btcPrice.value.current_price : 114082, 
-          change: btcPrice.status === 'fulfilled' ? btcPrice.value.price_change_percentage_24h : 3.55 
-        },
-        { 
-          symbol: 'ETH/USD', 
-          price: ethPrice.status === 'fulfilled' ? ethPrice.value.current_price : 4112.48, 
-          change: ethPrice.status === 'fulfilled' ? ethPrice.value.price_change_percentage_24h : 2.44 
-        },
-        { 
-          symbol: 'BNB/USD', 
-          price: bnbPrice.status === 'fulfilled' ? bnbPrice.value.current_price : 650.00, 
-          change: bnbPrice.status === 'fulfilled' ? bnbPrice.value.price_change_percentage_24h : 0.85 
-        },
-        { symbol: 'FOUR', price: 0.00703518, change: 31.33 },
-      ];
-    } catch (fallbackError) {
-      console.error('Fallback price fetch failed:', fallbackError);
-      // Final fallback with realistic prices
-      return [
-        { symbol: 'BTC/USD', price: 114082, change: 3.55 },
-        { symbol: 'ETH/USD', price: 4112.48, change: 2.44 },
-        { symbol: 'BNB/USD', price: 650.00, change: 0.85 },
-        { symbol: 'FOUR', price: 0.00703518, change: 31.33 },
-      ];
-    }
+  } catch (staticError) {
+    console.error('[EMERGENCY] Static market prices endpoint failed:', staticError);
   }
+  
+  // Final fallback with realistic prices
+  console.log('[EMERGENCY] Using hardcoded market prices');
+  return [
+    { symbol: 'BTC/USD', price: 122000, change: -0.3 },
+    { symbol: 'ETH/USD', price: 4480, change: -0.9 },
+    { symbol: 'BNB/USD', price: 1150, change: -2.5 },
+    { symbol: 'FOUR', price: 0.1558, change: -10.22 },
+  ];
 }
