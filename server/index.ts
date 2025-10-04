@@ -78,7 +78,11 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // In production (Vercel), static files are served by Vercel itself
+    // Only serve static files if we're running locally in production mode
+    if (process.env.VERCEL !== '1') {
+      serveStatic(app);
+    }
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT

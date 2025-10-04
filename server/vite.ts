@@ -88,12 +88,14 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+  // In production, Vercel serves static files from client/dist
+  // This function is mainly for local development fallback
+  const distPath = path.resolve(import.meta.dirname, "..", "client", "dist");
 
   if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
+    console.warn(`Build directory not found: ${distPath}, static serving disabled`);
+    // Don't throw error, just skip static serving
+    return;
   }
 
   app.use(express.static(distPath));
