@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertWalletProfileSchema } from "@shared/schema";
 
 const CRYPTOCOMPARE_BASE_URL = 'https://min-api.cryptocompare.com/data';
-const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || 'your-api-key-here';
+const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || 'd8b5c8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8';
 const COINGECKO_BASE_URL = 'https://api.coingecko.com/api/v3';
 const BIRDEYE_BASE_URL = 'https://public-api.birdeye.so';
 const DEXSCREENER_BASE_URL = 'https://api.dexscreener.com/latest/dex';
@@ -64,14 +64,28 @@ const FOUR_TOKEN_ADDRESS = '0x0A43fC31a73013089DF59194872Ecae4cAe14444';
 async function getFourPriceFromDexScreener(): Promise<{ price: number; change: number } | null> {
   try {
     console.log('[Price] Fetching FOUR price from DexScreener...');
-    const response = await fetch(`${DEXSCREENER_BASE_URL}/tokens/${FOUR_TOKEN_ADDRESS}`);
+    
+    // Add timeout and better error handling for Vercel
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(`${DEXSCREENER_BASE_URL}/tokens/${FOUR_TOKEN_ADDRESS}`, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Cybertrade/1.0',
+        'Accept': 'application/json',
+      }
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
-      console.error(`[Price] DexScreener API error: ${response.status}`);
+      console.error(`[Price] DexScreener API error: ${response.status} ${response.statusText}`);
       return null;
     }
     
     const data = await response.json();
+    console.log('[Price] DexScreener raw response:', JSON.stringify(data, null, 2));
     
     if (data.pairs && data.pairs.length > 0) {
       // Get the first pair (most liquid)
@@ -83,9 +97,13 @@ async function getFourPriceFromDexScreener(): Promise<{ price: number; change: n
       return { price, change: change24h };
     }
     
+    console.log('[Price] No pairs found in DexScreener response');
     return null;
   } catch (error) {
     console.error('[Price] DexScreener error:', error);
+    if (error.name === 'AbortError') {
+      console.error('[Price] DexScreener request timed out');
+    }
     return null;
   }
 }
@@ -163,9 +181,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try CryptoCompare first for major coins (BTC, ETH, SOL)
       if (cryptoSymbol) {
         try {
+          // Add timeout for Vercel compatibility
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+          
           const response = await fetch(
-            `${CRYPTOCOMPARE_BASE_URL}/pricemultifull?fsyms=${cryptoSymbol}&tsyms=USD`
+            `${CRYPTOCOMPARE_BASE_URL}/pricemultifull?fsyms=${cryptoSymbol}&tsyms=USD`,
+            {
+              signal: controller.signal,
+              headers: {
+                'User-Agent': 'Cybertrade/1.0',
+                'Accept': 'application/json',
+              }
+            }
           );
+          
+          clearTimeout(timeoutId);
           
           if (response.ok) {
             const data = await response.json();
@@ -184,6 +215,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (cryptoCompareError) {
           console.warn(`[Price] CryptoCompare error for ${symbol}, trying next source:`, cryptoCompareError);
+          if (cryptoCompareError.name === 'AbortError') {
+            console.warn(`[Price] CryptoCompare request timed out for ${symbol}`);
+          }
         }
       }
       
@@ -379,7 +413,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const cryptoCompareUrl = `${CRYPTOCOMPARE_BASE_URL}/${endpoint}?fsym=${cryptoSymbol}&tsym=USD&limit=${limit}&aggregate=${aggregate}`;
           console.log(`[Chart] Trying CryptoCompare: ${cryptoCompareUrl}`);
           
-          const response = await fetch(cryptoCompareUrl);
+          // Add timeout for Vercel compatibility
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          
+          const response = await fetch(cryptoCompareUrl, {
+            signal: controller.signal,
+            headers: {
+              'User-Agent': 'Cybertrade/1.0',
+              'Accept': 'application/json',
+            }
+          });
+          
+          clearTimeout(timeoutId);
           
           if (response.ok) {
             const result = await response.json();
