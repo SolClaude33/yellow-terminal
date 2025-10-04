@@ -65,11 +65,14 @@ async function getFourPriceFromDexScreener(): Promise<{ price: number; change: n
   try {
     console.log('[Price] Fetching FOUR price from DexScreener...');
     
-    // Add timeout and better error handling for Vercel
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    // Use internal proxy for Vercel serverless compatibility
+    const isProduction = process.env.NODE_ENV === 'production';
+    const baseUrl = isProduction ? 'https://www.yellowterminal.com' : 'http://localhost:5000';
     
-    const response = await fetch(`${DEXSCREENER_BASE_URL}/tokens/${FOUR_TOKEN_ADDRESS}`, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for proxy
+    
+    const response = await fetch(`${baseUrl}/api/proxy/dexscreener?address=${FOUR_TOKEN_ADDRESS}`, {
       signal: controller.signal,
       headers: {
         'User-Agent': 'Cybertrade/1.0',
@@ -80,12 +83,12 @@ async function getFourPriceFromDexScreener(): Promise<{ price: number; change: n
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      console.error(`[Price] DexScreener API error: ${response.status} ${response.statusText}`);
+      console.error(`[Price] DexScreener proxy error: ${response.status} ${response.statusText}`);
       return null;
     }
     
     const data = await response.json();
-    console.log('[Price] DexScreener raw response:', JSON.stringify(data, null, 2));
+    console.log('[Price] DexScreener proxy response:', JSON.stringify(data, null, 2));
     
     if (data.pairs && data.pairs.length > 0) {
       // Get the first pair (most liquid)
@@ -209,6 +212,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         status: 'error', 
         error: error.message,
+        type: error.name
+      });
+    }
+  });
+
+  // CORS proxy for external APIs (Vercel serverless fix)
+  app.get('/api/proxy/dexscreener', async (req, res) => {
+    try {
+      const tokenAddress = req.query.address as string;
+      if (!tokenAddress) {
+        return res.status(400).json({ error: 'Token address required' });
+      }
+
+      console.log('[Proxy] Proxying DexScreener request for:', tokenAddress);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Cybertrade/1.0',
+          'Accept': 'application/json',
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        res.json(data);
+      } else {
+        res.status(response.status).json({ 
+          error: 'DexScreener API error',
+          status: response.status,
+          statusText: response.statusText
+        });
+      }
+    } catch (error) {
+      console.error('[Proxy] DexScreener proxy error:', error);
+      res.status(500).json({ 
+        error: 'Proxy error',
+        message: error.message,
         type: error.name
       });
     }
