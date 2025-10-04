@@ -259,6 +259,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fallback endpoint with realistic data when all APIs fail
+  app.get('/api/crypto/fallback-data', (req, res) => {
+    console.log('[Fallback] Serving fallback data for all symbols');
+    
+    const fallbackData = {
+      'BTC/USD': {
+        current_price: 122000,
+        price_change_24h: -366,
+        price_change_percentage_24h: -0.3,
+        total_volume: 28500000000,
+        market_cap: 2400000000000
+      },
+      'ETH/USD': {
+        current_price: 4480,
+        price_change_24h: -40.32,
+        price_change_percentage_24h: -0.9,
+        total_volume: 15000000000,
+        market_cap: 540000000000
+      },
+      'BNB/USD': {
+        current_price: 1150,
+        price_change_24h: -29.5,
+        price_change_percentage_24h: -2.5,
+        total_volume: 2000000000,
+        market_cap: 170000000000
+      },
+      'FOUR': {
+        current_price: 0.1558,
+        price_change_24h: -0.0178,
+        price_change_percentage_24h: -10.22,
+        total_volume: 15000000,
+        market_cap: 155800000
+      }
+    };
+
+    res.json({
+      data: fallbackData,
+      timestamp: Date.now(),
+      source: 'fallback',
+      message: 'Using fallback data - APIs unavailable'
+    });
+  });
+
   // Proxy endpoint for crypto price data (uses CryptoCompare for major coins including BNB, Birdeye for Solana-specific tokens, fallback to CoinGecko)
   app.get('/api/crypto/price', async (req, res) => {
     try {
@@ -1007,20 +1050,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Fallback to static data if DexScreener fails
           marketData.push({
             symbol: 'FOUR',
-            price: 0.00703518,
-            change: 31.33,
+            price: 0.1558,
+            change: -10.22,
           });
-          console.log(`[Market Prices] Using static data for FOUR: $0.00703518`);
+          console.log(`[Market Prices] Using static data for FOUR: $0.1558`);
         }
       } catch (fourError) {
         console.error('[Market Prices] Error fetching FOUR data:', fourError);
         // Fallback to static data
         marketData.push({
           symbol: 'FOUR',
-          price: 0.00703518,
-          change: 31.33,
+          price: 0.1558,
+          change: -10.22,
         });
-        console.log(`[Market Prices] Using static data for FOUR: $0.00703518`);
+        console.log(`[Market Prices] Using static data for FOUR: $0.1558`);
       }
       
       console.log('[Market Prices] Fresh data fetched:', marketData);
@@ -1036,10 +1079,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Use current fallback data
       const fallbackData = [
-        { symbol: 'BTC/USD', price: 117500, change: 3.55 },
-        { symbol: 'ETH/USD', price: 4112.48, change: 2.44 },
-        { symbol: 'BNB/USD', price: 650.00, change: 0.85 },
-        { symbol: 'FOUR', price: 0.00703518, change: 31.33 },
+        { symbol: 'BTC/USD', price: 122000, change: -0.3 },
+        { symbol: 'ETH/USD', price: 4480, change: -0.9 },
+        { symbol: 'BNB/USD', price: 1150, change: -2.5 },
+        { symbol: 'FOUR', price: 0.1558, change: -10.22 },
       ];
       res.json({
         data: fallbackData,
