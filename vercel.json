@@ -1,13 +1,8 @@
 {
   "version": 2,
+  "buildCommand": "npm run build:client",
+  "outputDirectory": "client/dist",
   "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
     {
       "src": "server/index.ts",
       "use": "@vercel/node",
@@ -23,11 +18,10 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/$1"
+      "dest": "/client/dist/$1"
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "CRYPTOCOMPARE_API_KEY": "your-api-key-here"
+    "NODE_ENV": "production"
   }
 }
