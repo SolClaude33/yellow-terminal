@@ -41,10 +41,10 @@ export default function CyberHeader() {
         </div>
         <div className="text-center flex-1">
           <h1 className={`text-4xl font-cyber cyber-glow ${glitch ? 'glitch' : ''}`}>
-            Yellow Terminal
+            <span className="text-cyber-purple">暗池</span> <span className="text-muted-foreground/50">|</span> Dark Pool
           </h1>
           <div className="text-sm text-muted-foreground mt-1">
-            [TERMINAL v2.3.7 - STATUS: ONLINE]
+            [DARK POOL v3.0.0 - STATUS: ONLINE]
           </div>
           
           {/* Contract Address - Compact inline display */}

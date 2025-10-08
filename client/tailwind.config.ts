@@ -81,15 +81,18 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
-        // Add cyberpunk-specific colors
+        // Add Dark Pool cyberpunk-specific colors
         cyber: {
           blue: "#00d4ff",
           "blue-dark": "#0099ff",
+          purple: "#a855f7",
+          "purple-glow": "#c084fc",
           success: "#00ff88",
           danger: "#ff0044",
+          error: "#ff0044",
           gold: "#ffd700",
-          background: "#0a0a1a",
-          "background-alt": "#1a1a2e",
+          background: "#010108",
+          "background-alt": "#0a0a15",
         },
       },
       fontFamily: {

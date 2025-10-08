@@ -26,7 +26,7 @@ export default function CyberFooter() {
             LATENCY: 12ms
           </Badge>
           <div className="text-muted-foreground">
-            TERMINAL v2.3.7 | © 2025 Yellow Terminal Systems
+            暗池 DARK POOL v3.0.0 | © 2025 Dark Pool Systems
           </div>
         </div>
         

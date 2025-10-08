@@ -1,22 +1,45 @@
-# 🚀 Yellow Terminal - Crypto Trading Dashboard
+# 暗池 | Dark Pool - Ultra-Dark Crypto Trading Terminal
 
-A modern, cyberpunk-themed cryptocurrency trading dashboard built with React, TypeScript, and Express.js.
+An ultra-dark, cyberpunk-themed cryptocurrency trading dashboard with real-time market data, built with React, TypeScript, and Express.js.
 
-## 🔧 Latest Updates
-- Fixed CORS issues for Vercel deployment
-- Removed ASTER/USD from dashboard
-- Updated PUMP/USD price to current value
-- Fixed server configuration for production
+## 🌑 Dark Pool Features
 
-## ✨ Features
+暗池 (Àn Chí) means "Dark Pool" in Chinese - representing hidden liquidity and deep market insights.
 
-- **Real-time Crypto Prices**: Live data for BTC, ETH, BNB, and FOUR tokens
-- **FOUR Token Integration**: Special DexScreener API integration for real-time FOUR token data
-- **Interactive Charts**: Candlestick charts with zoom and pan functionality
-- **Fear & Greed Index**: Dynamic market sentiment calculation based on price movements
-- **Cyberpunk UI**: Dark theme with neon accents and matrix rain effects
-- **Responsive Design**: Works on desktop and mobile devices
-- **Live Market Data**: Real-time price updates every 5 seconds
+### 🎨 Ultra-Dark Theme
+- **Pitch Black Background**: Minimal eye strain with pure dark aesthetics
+- **Purple & Gold Accents**: Cyberpunk neon glow effects
+- **Matrix Rain Effects**: Dynamic background animations
+- **Glitch Text**: Retro-futuristic visual effects
+
+### 📊 Real-Time Market Data
+- **Live Crypto Prices**: BTC, ETH, BNB, and FOUR tokens
+- **Dynamic Charts**: Interactive candlestick charts with zoom/pan
+- **Market Sentiment**: Intelligent calculation based on 24h price movements
+- **Wallet Integration**: Connect MetaMask and view your holdings
+- **Portfolio Analyzer**: Track your top holdings and P&L
+
+## ✨ Key Features
+
+### 🔮 Intelligent Market Sentiment
+Calculates market sentiment in real-time using:
+- **Weighted Algorithm**: BTC (40%), ETH (30%), BNB (20%), FOUR (10%)
+- **7 Sentiment Levels**: From Extreme Fear to Extreme Greed
+- **Live Updates**: Refreshes every 30 seconds
+- **Price-Based Analysis**: No external APIs needed
+
+### 💰 Wallet Features
+- **MetaMask Integration**: Connect your wallet with one click
+- **Real Balance Display**: See your BNB holdings in real-time
+- **USD Conversion**: Live price conversion
+- **24h P&L**: Track your portfolio performance
+- **Top Holdings**: View your best performing assets
+
+### 📈 Advanced Charts
+- **Multiple Timeframes**: 1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M
+- **Interactive Controls**: Zoom, pan, and explore price history
+- **Real-Time Updates**: Live candlestick data
+- **Professional Design**: Trading-grade chart interface
 
 ## 🛠️ Tech Stack
 
@@ -25,12 +48,13 @@ A modern, cyberpunk-themed cryptocurrency trading dashboard built with React, Ty
 - **Styling**: Tailwind CSS, Custom CSS animations
 - **Charts**: Chart.js with financial plugins
 - **Data Fetching**: TanStack Query (React Query)
-- **APIs**: CryptoCompare, CoinGecko, DexScreener
+- **APIs**: CryptoCompare, CoinGecko, DexScreener, BSC RPC
+- **Web3**: MetaMask, Ethereum/BSC wallet integration
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -66,44 +90,70 @@ npm run dev
 
 1. Connect your GitHub repository to Vercel
 2. Set the following environment variables:
-   - `CRYPTOCOMPARE_API_KEY` - Your CryptoCompare API key
+   - `CRYPTOCOMPARE_API_KEY` - Your CryptoCompare API key (optional)
 3. Deploy!
 
 The project is configured with `vercel.json` for automatic deployment.
 
-## 🎨 Features Overview
+## 🎨 Dashboard Components
 
-### Dashboard Components
-- **Header**: Cyberpunk-themed header with glitch effects
-- **Left Sidebar**: Live market prices and Fear & Greed index
-- **Main Content**: Interactive candlestick charts with zoom/pan
-- **Right Sidebar**: Portfolio and wallet information
-- **Footer**: Social links and system status
+### 🔝 Header
+- Cyberpunk glitch effects
+- Contract address display with copy function
+- System status indicators
 
-### Chart Features
-- Multiple timeframes (1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M)
-- Zoom in/out with mouse wheel
-- Pan by clicking and dragging
-- Professional tooltips and animations
-- Dynamic candle colors based on price movement
-
-### Market Data
+### 📊 Left Sidebar
+- Live market prices for major cryptos
 - Real-time price updates
-- 24h change percentages
-- Trading volume
-- Market sentiment analysis
+- Meme corner with crypto art
+
+### 🖥️ Main Content
+- Interactive candlestick charts
+- Market sentiment indicator
+- Buy/Sell action buttons
+- Latest market updates
+
+### 👤 Right Sidebar
+- Wallet connection interface
+- Balance display (BNB & USD)
+- 24h P&L tracking
+- Top holdings portfolio
+
+### ⚡ Footer
+- Connection status
+- Live data indicators
+- Social media links
+- System information
 
 ## 🔧 Configuration
 
 ### Environment Variables
-- `CRYPTOCOMPARE_API_KEY` - Required for crypto data
+- `CRYPTOCOMPARE_API_KEY` - Optional for additional crypto data
 - `PORT` - Server port (default: 5000)
 
 ### API Endpoints
 - `/api/crypto/price` - Get current price for a symbol
 - `/api/crypto/chart` - Get candlestick data
 - `/api/crypto/market-prices` - Get multiple market prices
-- `/api/crypto/fear-greed` - Get market sentiment index
+- `/api/test/wallet-balance` - Test wallet balance fetching
+- `/api/bsc-rpc-proxy` - BSC blockchain RPC proxy
+
+## 🎯 Market Sentiment Algorithm
+
+The Dark Pool uses an intelligent weighted algorithm to calculate market sentiment:
+
+```typescript
+Sentiment Score = (BTC_change * 0.4) + (ETH_change * 0.3) + (BNB_change * 0.2) + (FOUR_change * 0.1)
+```
+
+### Sentiment Levels:
+- **0-19**: 😱 Extreme Fear - Market panic, potential buying opportunity
+- **20-34**: 📉 Fear - Strong bearish sentiment across markets
+- **35-44**: 😟 Cautious - Negative sentiment with some concern
+- **45-54**: 😐 Neutral - Balanced market sentiment
+- **55-64**: 😊 Optimistic - Positive sentiment with moderate optimism
+- **65-79**: 📈 Greed - Strong bullish sentiment across major assets
+- **80-100**: 🔥 Extreme Greed - Market extremely bullish, caution advised
 
 ## 🤝 Contributing
 
@@ -122,9 +172,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - CryptoCompare for market data API
 - CoinGecko for additional crypto data
 - DexScreener for real-time DEX data (especially FOUR token)
+- Binance Smart Chain for RPC endpoints
 - Chart.js for chart functionality
 - Tailwind CSS for styling framework
+- MetaMask for wallet integration
 
 ---
 
-**Built with ❤️ for the crypto community**
+**暗池 | Built with 🖤 for the crypto community**

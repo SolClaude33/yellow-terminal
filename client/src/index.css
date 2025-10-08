@@ -14,24 +14,24 @@
   --elevate-1: rgba(243, 186, 47, .08);
   --elevate-2: rgba(243, 186, 47, .15);
 
-  /* Cyberpunk color palette */
-  --background: 225 80% 5%;
+  /* Dark Pool - Ultra Dark Cyberpunk Theme */
+  --background: 240 100% 2%;
 
-  --foreground: 200 100% 90%;
+  --foreground: 200 100% 85%;
 
-  --border: 45 100% 25%;
+  --border: 280 60% 20%;
 
-  --card: 225 60% 8%;
+  --card: 240 80% 4%;
 
-  --card-foreground: 200 80% 85%;
+  --card-foreground: 200 80% 80%;
 
-  --card-border: 45 80% 20%;
+  --card-border: 280 70% 15%;
 
-  --sidebar: 225 70% 6%;
+  --sidebar: 240 90% 3%;
 
-  --sidebar-foreground: 200 70% 80%;
+  --sidebar-foreground: 200 70% 75%;
 
-  --sidebar-border: 45 70% 18%;
+  --sidebar-border: 280 60% 12%;
 
   --sidebar-primary: 45 100% 50%;
 
@@ -43,23 +43,23 @@
 
   --sidebar-ring: 45 100% 50%;
 
-  --popover: 225 50% 10%;
+  --popover: 240 70% 5%;
 
-  --popover-foreground: 200 60% 75%;
+  --popover-foreground: 200 60% 70%;
 
-  --popover-border: 45 60% 22%;
+  --popover-border: 280 60% 18%;
 
-  --primary: 45 100% 50%;
+  --primary: 280 80% 50%;
 
-  --primary-foreground: 225 80% 5%;
+  --primary-foreground: 240 100% 95%;
 
-  --secondary: 225 40% 12%;
+  --secondary: 240 60% 8%;
 
-  --secondary-foreground: 200 50% 70%;
+  --secondary-foreground: 200 50% 65%;
 
-  --muted: 225 30% 10%;
+  --muted: 240 50% 6%;
 
-  --muted-foreground: 200 40% 60%;
+  --muted-foreground: 200 40% 55%;
 
   --accent: 45 80% 18%;
 
@@ -230,6 +230,10 @@
 
 .cyber-glow-gold {
   text-shadow: 0 0 10px hsl(var(--cyber-gold)), 0 0 20px hsl(var(--cyber-gold)), 0 0 40px hsl(var(--cyber-gold));
+}
+
+.cyber-glow-purple {
+  text-shadow: 0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 40px #c084fc;
 }
 
 .cyber-border {
