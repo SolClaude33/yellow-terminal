@@ -57,7 +57,7 @@ export default function LeftSidebar() {
     <aside className="w-full h-full bg-sidebar cyber-border p-4 space-y-4 cyber-scrollbar overflow-y-auto">
       {/* Navigation Panel */}
       <Card className="p-4 cyber-border">
-        <h2 className="text-lg font-cyber cyber-glow mb-4">NAVIGATION</h2>
+        <h2 className="text-lg font-cyber cyber-glow-primary mb-4">NAVIGATION</h2>
         <div className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -82,7 +82,7 @@ export default function LeftSidebar() {
 
       {/* Status Indicators */}
       <Card className="p-4 cyber-border">
-        <h2 className="text-lg font-cyber cyber-glow mb-4">STATUS</h2>
+        <h2 className="text-lg font-cyber cyber-glow-primary mb-4">STATUS</h2>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-mono">CONNECTION</span>
@@ -94,7 +94,7 @@ export default function LeftSidebar() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm font-mono">ALERTS</span>
-            <Badge className="pulse-glow bg-cyber-gold">3 NEW</Badge>
+            <Badge className="pulse-glow bg-cyber-purple">3 NEW</Badge>
           </div>
         </div>
       </Card>
@@ -102,7 +102,7 @@ export default function LeftSidebar() {
       {/* Live Market Ticker */}
       <Card className="p-4 cyber-border">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-cyber cyber-glow">LIVE MARKET</h2>
+          <h2 className="text-lg font-cyber cyber-glow-primary">LIVE MARKET</h2>
           <Badge className="text-xs pulse-glow" data-testid="badge-live-market">LIVE</Badge>
         </div>
         <div className="space-y-2 text-xs font-mono">
@@ -136,7 +136,7 @@ export default function LeftSidebar() {
 
       {/* Meme Corner */}
       <Card className="p-4 cyber-border">
-        <h2 className="text-lg font-cyber cyber-glow mb-4">MEME CORNER</h2>
+        <h2 className="text-lg font-cyber cyber-glow-primary mb-4">MEME CORNER</h2>
         <div className="text-center">
           <img 
             src={memes[currentMeme]} 

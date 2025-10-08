@@ -15,7 +15,7 @@ export default function CyberFooter() {
             <span>LIVE DATA</span>
           </div>
           <div className="flex items-center space-x-1">
-            <Shield className="w-3 h-3 text-cyber-gold" />
+            <Shield className="w-3 h-3 text-cyber-purple" />
             <span>SECURE</span>
           </div>
         </div>
@@ -45,7 +45,7 @@ export default function CyberFooter() {
             href="https://four.meme" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center space-x-1 text-cyber-gold hover:text-cyber-gold/80 transition-colors"
+            className="flex items-center space-x-1 text-cyber-purple hover:text-cyber-purple/80 transition-colors"
           >
             <Zap className="w-3 h-3" />
             <span>four.meme</span>

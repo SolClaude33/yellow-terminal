@@ -99,7 +99,7 @@ export default function RightSidebar() {
           </Avatar>
           {!connected ? (
             <>
-              <h3 className="font-cyber text-lg cyber-glow mb-2">CONNECT WALLET</h3>
+              <h3 className="font-cyber text-lg cyber-glow-primary mb-2">CONNECT WALLET</h3>
               <p className="text-sm font-mono text-muted-foreground mb-3">
                 Link your BSC wallet
               </p>
@@ -126,7 +126,7 @@ export default function RightSidebar() {
             </>
           ) : (
             <>
-              <h3 className="font-cyber text-lg cyber-glow" data-testid="text-wallet-address">
+              <h3 className="font-cyber text-lg cyber-glow-primary" data-testid="text-wallet-address">
                 {profile?.username || (walletAddress ? formatWalletAddress(walletAddress) : 'CYBER_TRADER')}
               </h3>
               <p className="text-sm font-mono text-muted-foreground mb-3">
@@ -135,11 +135,11 @@ export default function RightSidebar() {
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div className="text-center">
                   {balanceLoading ? (
-                    <div className="text-cyber-gold font-cyber">
+                    <div className="text-cyber-purple font-cyber">
                       <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                     </div>
                   ) : (
-                    <div className="text-cyber-gold font-cyber" data-testid="text-balance-usd">
+                    <div className="text-cyber-purple font-cyber" data-testid="text-balance-usd">
                       {formatCurrency(usd)}
                     </div>
                   )}
@@ -192,7 +192,7 @@ export default function RightSidebar() {
       {/* Portfolio Holdings */}
       {connected && (
         <Card className="p-4 cyber-border">
-          <h2 className="text-lg font-cyber cyber-glow mb-4">TOP HOLDINGS</h2>
+          <h2 className="text-lg font-cyber cyber-glow-primary mb-4">TOP HOLDINGS</h2>
           {portfolioLoading || balanceLoading ? (
             <div className="text-center py-8">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
@@ -224,7 +224,7 @@ export default function RightSidebar() {
                 })}
               </div>
               <div className="mt-4 text-center">
-                <div className="text-2xl font-cyber cyber-glow" data-testid="text-total-portfolio-value">
+                <div className="text-2xl font-cyber cyber-glow-primary" data-testid="text-total-portfolio-value">
                   {formatCurrency(totalPortfolioValue)}
                 </div>
                 <div className="text-xs font-mono text-muted-foreground">Total Value</div>
@@ -236,7 +236,7 @@ export default function RightSidebar() {
 
       {/* Top Traders Leaderboard */}
       <Card className="p-4 cyber-border">
-        <h2 className="text-lg font-cyber cyber-glow mb-4 flex items-center">
+        <h2 className="text-lg font-cyber cyber-glow-primary mb-4 flex items-center">
           <Trophy className="w-5 h-5 mr-2" />
           TOP TRADERS
         </h2>
@@ -270,7 +270,7 @@ export default function RightSidebar() {
 
       {/* Social Feed */}
       <Card className="p-4 cyber-border">
-        <h2 className="text-lg font-cyber cyber-glow mb-4 flex items-center">
+        <h2 className="text-lg font-cyber cyber-glow-primary mb-4 flex items-center">
           <MessageSquare className="w-5 h-5 mr-2" />
           SOCIAL FEED
         </h2>

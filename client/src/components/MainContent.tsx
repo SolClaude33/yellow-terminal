@@ -57,7 +57,7 @@ export default function MainContent() {
       {/* Trading Chart Section */}
       <Card className="p-6 cyber-border">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-cyber cyber-glow">TRADING CHART</h2>
+          <h2 className="text-2xl font-cyber cyber-glow-primary">TRADING CHART</h2>
           <Badge className="pulse-glow">LIVE</Badge>
         </div>
         
@@ -69,7 +69,7 @@ export default function MainContent() {
           {/* Main Price Card */}
           <Card className="p-8 text-center cyber-border relative bg-gradient-to-br from-card/50 to-card/30 hover:from-card/60 hover:to-card/40 transition-all duration-300 min-h-[140px] flex flex-col justify-center">
             <Badge className="absolute -top-2 inset-x-0 mx-auto w-fit text-sm font-bold pulse-glow bg-primary/30 text-primary border-primary/50 px-3 py-1 text-center" data-testid="badge-live-price">LIVE</Badge>
-            <div className="text-4xl font-cyber cyber-glow text-primary mb-3 leading-tight" data-testid="text-live-price">
+            <div className="text-4xl font-cyber cyber-glow-primary text-primary mb-3 leading-tight" data-testid="text-live-price">
               ${selectedSymbol === 'BNB/USD' && livePrice ? livePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 
                 (priceData?.current_price ? priceData.current_price.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '...')}
             </div>
@@ -93,7 +93,7 @@ export default function MainContent() {
           
           {/* Volume Card */}
           <Card className="p-8 text-center cyber-border bg-gradient-to-br from-card/50 to-card/30 hover:from-card/60 hover:to-card/40 transition-all duration-300 min-h-[140px] flex flex-col justify-center">
-            <div className="text-4xl font-cyber text-cyber-gold cyber-glow-gold mb-3 leading-tight" data-testid="text-volume">
+            <div className="text-4xl font-cyber text-cyber-purple cyber-glow-purple mb-3 leading-tight" data-testid="text-volume">
               ${isLoading ? '...' : (priceData?.total_volume ? (priceData.total_volume / 1000000000).toFixed(1) + 'B' : '2.1B')}
             </div>
             <div className="text-sm font-mono text-muted-foreground">Volume</div>
@@ -126,7 +126,7 @@ export default function MainContent() {
       {/* Market Sentiment - Calculated from Price Changes */}
       <Card className="p-6 cyber-border">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-cyber cyber-glow">MARKET SENTIMENT</h2>
+          <h2 className="text-xl font-cyber cyber-glow-primary">MARKET SENTIMENT</h2>
           <Badge className="text-xs" data-testid="badge-sentiment-source">Price Analysis</Badge>
         </div>
         <div className="flex items-center space-x-4">
@@ -138,7 +138,7 @@ export default function MainContent() {
             <Progress value={marketSentiment.value} className="h-3" />
           </div>
           <div className="text-right">
-            <div className="text-2xl font-cyber cyber-glow" data-testid="text-sentiment-value">
+            <div className="text-2xl font-cyber cyber-glow-primary" data-testid="text-sentiment-value">
               {marketSentiment.isLoading ? '...' : marketSentiment.value}
             </div>
             <div className="text-xs font-mono text-muted-foreground" data-testid="text-sentiment-classification">
@@ -153,7 +153,7 @@ export default function MainContent() {
 
       {/* Latest Updates */}
       <Card className="p-6 cyber-border">
-        <h2 className="text-xl font-cyber cyber-glow mb-4">LATEST UPDATES</h2>
+        <h2 className="text-xl font-cyber cyber-glow-primary mb-4">LATEST UPDATES</h2>
         <div className="bg-card/30 cyber-border rounded p-4">
           <div className="typewriter text-sm font-mono" key={newsIndex}>
             [{news[newsIndex].time}] {news[newsIndex].text}
